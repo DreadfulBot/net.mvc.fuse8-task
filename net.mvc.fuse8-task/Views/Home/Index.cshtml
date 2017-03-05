@@ -1,0 +1,112 @@
+﻿@model net.mvc.fuse8_task.Models.IndexViewModel
+
+@using GridMvc.Html
+@{
+    ViewBag.Title = "Details";
+}
+@{
+    Layout = null;
+}
+
+<link href="@Url.Content("~/Content/Gridmvc.css")" rel="stylesheet" />
+
+<link href="@Url.Content("~/Content/bootstrap.min.css")" rel="stylesheet"/>
+
+<link href="@Url.Content("~/Content/themes/base/jquery-ui.min.css")" rel="stylesheet" />
+<link href="@Url.Content("~/Content/themes/base/core.css")" rel="stylesheet"/>
+<link href="@Url.Content("~/Content/themes/base/theme.css")" rel="stylesheet"/>
+<link href="@Url.Content("~/Content/themes/base/datepicker.css")" rel="stylesheet"/>
+
+<script src="@Url.Content("~/Scripts/jquery-3.1.1.min.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery-ui-1.12.1.min.js")"></script>
+<script src="@Url.Content("~/Scripts/datepicker-ru.js")"></script>
+<script src="@Url.Content("~/Scripts/gridmvc.min.js")"></script>
+<script src="@Url.Content("~/Scripts/Core.js")"></script>
+
+<div class="container">
+    <div class="row">
+        @* Служебные сообщения *@
+        <div class="col-md-6">
+            <h2>NorthWindDatabase task for fuse8</h2>
+            @if (Model.IsErrorSet)
+            {
+                <p class="bg-danger">@Model.ErrorMessage</p>
+            }
+            else if (Model.IsDateIntervalSet == false)
+            {
+                <p class="bg-info">В таблице отображены последние 100 заказов в порядке убывания даты</p>
+            }
+            else
+            {
+                <p class="bg-info">Временной промежуток: @Model.StartDate.Value.ToShortDateString() - @Model.EndDate.Value.ToShortDateString()</p>
+                <p class="bg-info">Всего записей: @Model.Products.Count()</p>
+            }
+        </div>
+
+        @* Выбор даты *@
+        <div class="col-md-6">
+            <form action="/Home/Index" method="GET">
+                <div class="form-group">
+                    <label for="startDate">Начальная дата:</label>
+                    <input type="text" name="startDate" class="form-control" id="startDate" value="@Model.StartDate.Value.ToShortDateString()"/>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">Конечная дата:</label>
+                    <input type="text" name="endDate" class="form-control" id="endDate" value="@Model.EndDate.Value.ToShortDateString()"/>
+                </div>
+                <input type="submit" class="btn btn-primary"/>
+            </form>
+        </div>
+    </div>
+
+    @if (!Model.IsErrorSet)
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Данные для аутентификации по sftp:</label>
+                        <input class="form-control" type="text" name="smtpHost" id="smtpHost" value="smtp.gmail.com" placeholder="smtp-сервер"/>
+                        <input class="form-control" type="text" name="smtpSender" id="smtpSender" placeholder="smtp-отправитель"/>
+                        <input class="form-control" type="password" name="smtpPassword" id="smtpPassword" placeholder="smpt-пароль"/>
+                    </div>
+                </div>
+                @*<div class="col-md-6">
+                <div class="form-group">
+                    <label for="fileName">1. Укажите имя файла:</label>
+                    <input name="fileName" id="fileName" />
+                </div>
+                <a class="btn btn-default" id="exportExcelBtn">
+                    Сохранить отчет в EXCEL
+                </a>
+            </div>*@
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="emailTo">Укажите email:</label>
+                        <input class="form-control" name="emailTo" id="emailTo"/>
+                    </div>
+                    <a class="btn btn-default" id="sendEmailBtn">
+                        Отправить по отчет почте
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6 offset-md-6"></div>
+            @if (Model.Products != null)
+            {
+                @Html.Grid(Model.Products).Columns(columns =>
+            {
+                columns.Add(c => c.Order.ID).Titled(Model.TableHead[0]).Filterable(true);
+                columns.Add(c => c.Order.OrderDate).Titled(Model.TableHead[1]).Filterable(true);
+                columns.Add(c => c.Product.ID).Titled(Model.TableHead[2]).Filterable(true);
+                columns.Add(c => c.Product.Name).Titled(Model.TableHead[3]).Filterable(true);
+                columns.Add(c => c.OrderDetail.Quantity).Titled(Model.TableHead[4]).Filterable(true);
+                columns.Add(c => c.OrderDetail.UnitPrice).Titled(Model.TableHead[5]).Filterable(true);
+
+            }).WithPaging(10).Sortable(true)
+            }
+    </div>
+</div>
